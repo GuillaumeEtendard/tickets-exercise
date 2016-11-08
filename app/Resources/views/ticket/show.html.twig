@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ ticket.title }} - {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <div class="col-lg-8">
+
+        <a href="{{ path('ticket_show', { 'id': ticket.id }) }}">
+            <h1>{{ ticket.title }}</h1>
+        </a>
+
+        <p><span class="glyphicon glyphicon-time"></span> Posted on
+            {% if ticket.created %}{{ ticket.created|date('Y-m-d H:i:s') }}{% endif %}
+        </p>
+
+        <hr>
+        <p>{{ ticket.content }}</p>
+        <hr>
+
+        <a href="{{ path('ticket_edit', { 'id': ticket.id }) }}" class="btn btn-primary">Edit Ticket</a>
+        <a href="{{ path('ticket_index') }}" class="btn btn-primary right">Back to the list</a>
+
+        <hr>
+
+        {{ form_start(delete_form) }}
+        <input type="submit" value="Delete Ticket" class="btn btn-primary">
+        {{ form_end(delete_form) }}
+
+        <hr>
+
+        <div class="well">
+            <h4>Leave a Comment:</h4>
+            {{ form_start(form, {'action': path('message_new', {'ticketId' : ticket.id}), 'method': 'POST'}) }}
+            <div class="form-group">
+                <div class="col-xs-6">
+                    {{ form_widget(form) }}
+                </div>
+            </div>
+            <input type="submit" value="Create" class="btn btn-primary">
+            {{ form_end(form) }}
+        </div>
+
+        <hr>
+
+        {% for message in messages %}
+            <div class="media">
+                <div class="media-body">
+                    <h4 class="media-heading">
+                        {{ message.content }}
+                        <small>
+                            {% if ticket.created %}{{ ticket.created|date('Y-m-d H:i:s') }}{% endif %}
+                        </small>
+                    </h4>
+                </div>
+
+                <div class="media-right">
+                    <a href="{{ path('message_edit', { 'id': message.id }) }}" class="btn btn-primary">Edit</a>
+                </div>
+            </div>
+
+            <hr>
+        {% endfor %}
+    </div>
+{% endblock %}

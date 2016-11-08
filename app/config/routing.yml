@@ -1,0 +1,4 @@
+awesome:
+    resource: "@AwesomeBundle/Controller/"
+    type:     annotation
+    prefix:   /
