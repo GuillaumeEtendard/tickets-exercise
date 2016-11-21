@@ -9,6 +9,7 @@
 
         <a href="{{ path('ticket_show', { 'id': ticket.id }) }}">
             <h1>{{ ticket.title }}</h1>
+            <a href="{{ path('ticket_index') }}" class="btn btn-primary pull-right">Back to the list</a>
         </a>
 
         <p><span class="glyphicon glyphicon-time"></span> Posted on
@@ -25,9 +26,6 @@
         {% endfor %}
         <hr>
 
-        <a href="{{ path('ticket_index') }}" class="btn btn-primary right">Back to the list</a>
-
-        <hr>
         {% for role in app.user.roles if role == 'ROLE_ADMIN' %}
             <p>Admins Tasks</p>
             <a href="{{ path('ticket_edit', { 'id': ticket.id }) }}" class="btn btn-primary">Edit Ticket</a>
@@ -52,8 +50,8 @@
         </div>
 
         <hr>
-        <h3>User Comment Example</h3>
 
+        <h3>Messages</h3>
 
         {% for message in messages %}
             <div class="row">
@@ -65,17 +63,14 @@
                         </div>
                         <div class="panel-body">
                             {{ message.content }}
-                        </div><!-- /panel-body -->
-                    </div><!-- /panel panel-default -->
-                </div><!-- /col-sm-5 -->
+                        </div>
+                    </div>
+                </div>
                 {% for role in app.user.roles if role == 'ROLE_ADMIN' %}
-                    <a href="{{ path('message_edit', { 'id': message.id }) }}" class="btn btn-primary">Edit</a>
+                    <a href="{{ path('message_edit', { 'id': message.id }) }}" class="btn btn-primary">Edit | Delete</a>
                 {% endfor %}
-                <!--
-                {{ form_start(delete_form, {'action': path('message_delete', {'id' : message.id }), 'method': 'DELETE'}) }}
-                <input type="submit" value="Delete Message" class="btn btn-primary btn-danger">
-                {{ form_end(delete_form) }}
-                -->
+
+
             </div>
 
 

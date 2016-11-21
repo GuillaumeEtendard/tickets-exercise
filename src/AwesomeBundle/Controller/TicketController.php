@@ -33,16 +33,13 @@ class TicketController extends Controller
         $userConnected = $this->get('security.token_storage')->getToken()->getUser();
 
         if ($userConnected !== 'anon.') {
-            $tickets = $em->getRepository('AwesomeBundle:Ticket')
-                ->findAll(array('id' => 'DESC'));
+            $userTickets = $em->getRepository('AwesomeBundle:Ticket')
+                ->findBy(['owner' => $userConnected->getId()],array('created' => 'DESC'));
 
-            $userTickets = [];
-            foreach ($tickets as $ticket) {
-                if ($ticket->getOwner()->getId() == $userConnected->getId())
-                    $userTickets[] = $ticket;
-            }
+            $allTickets = $em->getRepository('AwesomeBundle:Ticket')
+                ->findBy([], array('created' => 'DESC'));
 
-            foreach ($tickets as $ticket) {
+            foreach ($allTickets as $ticket) {
                 foreach ($ticket->getUser() as $user) {
                     if ($user->getId() == $userConnected->getId())
                         $userTickets[] = $ticket;
@@ -53,7 +50,7 @@ class TicketController extends Controller
 
             if ($userConnected->hasRole('ROLE_ADMIN')) {
                 return $this->render('ticket/index.html.twig', array(
-                    'tickets' => $tickets,
+                    'tickets' => $allTickets,
                 ));
             }
             return $this->render('ticket/index.html.twig', array(
