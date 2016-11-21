@@ -4,9 +4,14 @@ namespace AwesomeBundle\Controller;
 
 use AwesomeBundle\Entity\Message;
 use AwesomeBundle\Entity\Ticket;
+use AwesomeBundle\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -25,12 +30,38 @@ class TicketController extends Controller
     public function indexAction()
     {
         $em = $this->getDoctrine()->getManager();
+        $userConnected = $this->get('security.token_storage')->getToken()->getUser();
 
-        $tickets = $em->getRepository('AwesomeBundle:Ticket')->findBy(array(), array('id' => 'DESC'));
+        if ($userConnected !== 'anon.') {
+            $tickets = $em->getRepository('AwesomeBundle:Ticket')
+                ->findAll(array('id' => 'DESC'));
 
-        return $this->render('ticket/index.html.twig', array(
-            'tickets' => $tickets,
-        ));
+            $userTickets = [];
+            foreach ($tickets as $ticket) {
+                if ($ticket->getOwner()->getId() == $userConnected->getId())
+                    $userTickets[] = $ticket;
+            }
+
+            foreach ($tickets as $ticket) {
+                foreach ($ticket->getUser() as $user) {
+                    if ($user->getId() == $userConnected->getId())
+                        $userTickets[] = $ticket;
+                }
+            }
+
+            $userTickets = array_map("unserialize", array_unique(array_map("serialize", $userTickets)));
+
+            if ($userConnected->hasRole('ROLE_ADMIN')) {
+                return $this->render('ticket/index.html.twig', array(
+                    'tickets' => $tickets,
+                ));
+            }
+            return $this->render('ticket/index.html.twig', array(
+                'tickets' => $userTickets,
+            ));
+        } else {
+            return $this->render('ticket/index.html.twig', array());
+        }
     }
 
     /**
@@ -41,14 +72,32 @@ class TicketController extends Controller
      */
     public function newAction(Request $request)
     {
+        $user = $this->get('security.token_storage')->getToken()->getUser();
+        if (!$user) {
+            throw new \Exception('You have to be logged in');
+        }
+
         $ticket = new Ticket();
+
         $form = $this->createForm('AwesomeBundle\Form\TicketType', $ticket);
         $form->handleRequest($request);
 
+        $message = new Message();
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $ticket->setCreated(new \DateTime('now'));
-            $ticket->setUpdated(new \DateTime('now'));
+            $ticket->setCreated(new \DateTime('now', new \DateTimeZone('Europe/Paris')));
+            $ticket->setUpdated(new \DateTime('now', new \DateTimeZone('Europe/Paris')));
+            $ticket->setOwner($user);
+
+            $message->setContent($request->request->get('message'));
+            $message->setTicket($ticket);
+            $message->setCreated(new \DateTime('now'));
+            $message->setUpdated(new \DateTime('now'));
+            $message->setUser($user);
+
+            $em->persist($message);
+            $em->flush($message);
+
             $em->persist($ticket);
             $em->flush($ticket);
 
@@ -67,16 +116,28 @@ class TicketController extends Controller
      * @Route("/{id}", name="ticket_show")
      * @Method("GET")
      */
-    public function showAction(Ticket $ticket)
+    public function showAction(Ticket $ticket, Request $request)
     {
+        $user = $this->get('security.token_storage')->getToken()->getUser();
+
+        if (!$user->getId()) {
+            throw new \Exception('You have no permission');
+        }
+        if (!$user->hasRole('ROLE_ADMIN')) {
+            if ($user != $ticket->getOwner() && !in_array($user, $ticket->getUser()->getValues())) {
+                throw new \Exception('You have no permission');
+            }
+        }
+
         $deleteForm = $this->createDeleteForm($ticket);
 
         $message = new Message();
         $form = $this->createForm('AwesomeBundle\Form\MessageType', $message);
 
+
         $messages = $this->getDoctrine()
             ->getRepository('AwesomeBundle:Message')
-            ->findBy(['ticket' => $ticket], array('id' => 'DESC'));
+            ->findBy(['ticket' => $ticket], array('id' => 'ASC'));
 
         return $this->render('ticket/show.html.twig', array(
             'messages' => $messages,
@@ -94,8 +155,16 @@ class TicketController extends Controller
      */
     public function editAction(Request $request, Ticket $ticket)
     {
+        $user = $this->get('security.token_storage')->getToken()->getUser();
+
+        if (!$user->hasRole('ROLE_ADMIN')) {
+            throw new \Exception('You have no permission');
+
+        }
+
         $deleteForm = $this->createDeleteForm($ticket);
-        $editForm = $this->createForm('AwesomeBundle\Form\TicketType', $ticket);
+
+        $editForm = $this->createForm('AwesomeBundle\Form\TicketEditType', $ticket);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
@@ -119,6 +188,13 @@ class TicketController extends Controller
      */
     public function deleteAction(Request $request, Ticket $ticket)
     {
+        $user = $this->get('security.token_storage')->getToken()->getUser();
+
+        if (!$user->hasRole('ROLE_ADMIN')) {
+            throw new \Exception('You have no permission');
+
+        }
+
         $form = $this->createDeleteForm($ticket);
         $form->handleRequest($request);
 

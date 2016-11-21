@@ -42,12 +42,17 @@ class Message
      */
     private $updated;
 
-
     /**
-     * @ORM\ManyToOne(targetEntity="Ticket", inversedBy="messages")
+     * @ORM\ManyToOne(targetEntity="Ticket", cascade={"persist"})
      * @ORM\JoinColumn(name="ticket_id", referencedColumnName="id", nullable=false)
      */
     private $ticket;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User", cascade={"persist"})
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
 
     /**
      * Get id
@@ -153,5 +158,29 @@ class Message
     public function getTicket()
     {
         return $this->ticket;
+    }
+
+    /**
+     * Set user
+     *
+     * @param \AwesomeBundle\Entity\User $user
+     *
+     * @return Message
+     */
+    public function setUser(\AwesomeBundle\Entity\User $user)
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * Get user
+     *
+     * @return \AwesomeBundle\Entity\User
+     */
+    public function getUser()
+    {
+        return $this->user;
     }
 }

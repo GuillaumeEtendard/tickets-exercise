@@ -14,19 +14,28 @@
         <p><span class="glyphicon glyphicon-time"></span> Posted on
             {% if ticket.created %}{{ ticket.created|date('Y-m-d H:i:s') }}{% endif %}
         </p>
-
+        <h4> By {{ ticket.owner }}
+        </h4>
         <hr>
-        <p>{{ ticket.content }}</p>
+        <p>Users granted</p>
+        {% for user in ticket.user %}
+            <ul>
+                <li>{{ user.username }}</li>
+            </ul>
+        {% endfor %}
         <hr>
 
-        <a href="{{ path('ticket_edit', { 'id': ticket.id }) }}" class="btn btn-primary">Edit Ticket</a>
         <a href="{{ path('ticket_index') }}" class="btn btn-primary right">Back to the list</a>
 
         <hr>
+        {% for role in app.user.roles if role == 'ROLE_ADMIN' %}
+            <p>Admins Tasks</p>
+            <a href="{{ path('ticket_edit', { 'id': ticket.id }) }}" class="btn btn-primary">Edit Ticket</a>
 
-        {{ form_start(delete_form) }}
-        <input type="submit" value="Delete Ticket" class="btn btn-primary">
-        {{ form_end(delete_form) }}
+            {{ form_start(delete_form) }}
+            <input type="submit" value="Delete Ticket" class="btn btn-primary btn-danger">
+            {{ form_end(delete_form) }}
+        {% endfor %}
 
         <hr>
 
@@ -43,22 +52,32 @@
         </div>
 
         <hr>
+        <h3>User Comment Example</h3>
+
 
         {% for message in messages %}
-            <div class="media">
-                <div class="media-body">
-                    <h4 class="media-heading">
-                        {{ message.content }}
-                        <small>
-                            {% if ticket.created %}{{ ticket.created|date('Y-m-d H:i:s') }}{% endif %}
-                        </small>
-                    </h4>
-                </div>
-
-                <div class="media-right">
+            <div class="row">
+                <div class="col-sm-10">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <strong>{{ message.user.username }}</strong> <span class="text-muted">commented
+                                {% if ticket.created %}{{ ticket.created|date('Y-m-d H:i:s') }}{% endif %}</span>
+                        </div>
+                        <div class="panel-body">
+                            {{ message.content }}
+                        </div><!-- /panel-body -->
+                    </div><!-- /panel panel-default -->
+                </div><!-- /col-sm-5 -->
+                {% for role in app.user.roles if role == 'ROLE_ADMIN' %}
                     <a href="{{ path('message_edit', { 'id': message.id }) }}" class="btn btn-primary">Edit</a>
-                </div>
+                {% endfor %}
+                <!--
+                {{ form_start(delete_form, {'action': path('message_delete', {'id' : message.id }), 'method': 'DELETE'}) }}
+                <input type="submit" value="Delete Message" class="btn btn-primary btn-danger">
+                {{ form_end(delete_form) }}
+                -->
             </div>
+
 
             <hr>
         {% endfor %}

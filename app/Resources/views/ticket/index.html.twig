@@ -5,16 +5,25 @@
 {% endblock %}
 
 {% block body %}
-    <a href="{{ path('ticket_new') }}" class="btn btn-primary">Create a new ticket</a>
-    {% for ticket in tickets %}
-        <a href="{{ path('ticket_show', { 'id': ticket.id }) }}">
-            <h2>{{ ticket.title }}</h2>
-        </a>
+    {% if app.user %}
+        <a href="{{ path('ticket_new') }}" class="btn btn-primary">
+            Create a new ticket</a>
+    {% endif %}
+    {% if tickets is defined %}
+        {% for ticket in tickets %}
+            <a href="{{ path('ticket_show', { 'id': ticket.id }) }}">
+                <h2>{{ ticket.title }}</h2>
+            </a>
 
-        <p><span class="glyphicon glyphicon-time"></span> Posted on
-            {% if ticket.created %}{{ ticket.created|date('Y-m-d H:i:s') }}{% endif %}
-        </p>
-
-        <hr>
-    {% endfor %}
+            <p><span class="glyphicon glyphicon-time"></span> Posted on
+                {% if ticket.created %}{{ ticket.created|date('Y-m-d H:i:s') }}{% endif %}
+            </p>
+            By {{ ticket.owner }}
+            <p>Users granted : </p>
+            {% for usersGranted in ticket.user %}
+                {{ usersGranted.username }}
+            {% endfor %}
+            <hr>
+        {% endfor %}
+    {% endif %}
 {% endblock %}

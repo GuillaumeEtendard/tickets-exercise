@@ -29,13 +29,6 @@ class Ticket
     private $title;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="content", type="text")
-     */
-    private $content;
-
-    /**
      * @var \DateTime
      *
      * @ORM\Column(name="created", type="datetime")
@@ -49,11 +42,31 @@ class Ticket
      */
     private $updated;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="User", cascade={"persist"})
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $owner;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="User", cascade={"persist"})
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
+
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->user = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 
     /**
      * Get id
      *
-     * @return int
+     * @return integer
      */
     public function getId()
     {
@@ -82,30 +95,6 @@ class Ticket
     public function getTitle()
     {
         return $this->title;
-    }
-
-    /**
-     * Set content
-     *
-     * @param string $content
-     *
-     * @return Ticket
-     */
-    public function setContent($content)
-    {
-        $this->content = $content;
-
-        return $this;
-    }
-
-    /**
-     * Get content
-     *
-     * @return string
-     */
-    public function getContent()
-    {
-        return $this->content;
     }
 
     /**
@@ -154,5 +143,63 @@ class Ticket
     public function getUpdated()
     {
         return $this->updated;
+    }
+
+    /**
+     * Set owner
+     *
+     * @param \AwesomeBundle\Entity\User $owner
+     *
+     * @return Ticket
+     */
+    public function setOwner(\AwesomeBundle\Entity\User $owner)
+    {
+        $this->owner = $owner;
+
+        return $this;
+    }
+
+    /**
+     * Get owner
+     *
+     * @return \AwesomeBundle\Entity\User
+     */
+    public function getOwner()
+    {
+        return $this->owner;
+    }
+
+    /**
+     * Add user
+     *
+     * @param \AwesomeBundle\Entity\User $user
+     *
+     * @return Ticket
+     */
+    public function addUser(\AwesomeBundle\Entity\User $user)
+    {
+        $this->user[] = $user;
+
+        return $this;
+    }
+
+    /**
+     * Remove user
+     *
+     * @param \AwesomeBundle\Entity\User $user
+     */
+    public function removeUser(\AwesomeBundle\Entity\User $user)
+    {
+        $this->user->removeElement($user);
+    }
+
+    /**
+     * Get user
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getUser()
+    {
+        return $this->user;
     }
 }

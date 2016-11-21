@@ -22,6 +22,11 @@ class MessageController extends Controller
      */
     public function newAction(Request $request, $ticketId)
     {
+        $user = $this->get('security.token_storage')->getToken()->getUser();
+        if (!$user) {
+            throw new \Exception('You have to be logged in');
+        }
+
         $message = new Message();
         $form = $this->createForm('AwesomeBundle\Form\MessageType', $message);
         $form->handleRequest($request);
@@ -31,9 +36,11 @@ class MessageController extends Controller
             $ticket = $this->getDoctrine()
                 ->getRepository('AwesomeBundle:Ticket')
                 ->find($ticketId);
+
             $message->setTicket($ticket);
             $message->setCreated(new \DateTime(null, new \DateTimeZone('Europe/Paris')));
             $message->setUpdated(new \DateTime(null, new \DateTimeZone('Europe/Paris')));
+            $message->setUser($user);
             $em->persist($message);
             $em->flush($message);
 
@@ -55,6 +62,12 @@ class MessageController extends Controller
      */
     public function editAction(Request $request, Message $message)
     {
+        $user = $this->get('security.token_storage')->getToken()->getUser();
+
+        if (!$user->hasRole('ROLE_ADMIN')) {
+            throw new \Exception('You have no permission');
+
+        }
         $deleteForm = $this->createDeleteForm($message);
         $editForm = $this->createForm('AwesomeBundle\Form\MessageType', $message);
         $editForm->handleRequest($request);
@@ -80,6 +93,12 @@ class MessageController extends Controller
      */
     public function deleteAction(Request $request, Message $message)
     {
+        $user = $this->get('security.token_storage')->getToken()->getUser();
+
+        if (!$user->hasRole('ROLE_ADMIN')) {
+            throw new \Exception('You have no permission');
+
+        }
         $form = $this->createDeleteForm($message);
         $form->handleRequest($request);
 

@@ -15,17 +15,43 @@
 </head>
 
 <body>
-<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+<nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse"
-                    data-target="#bs-example-navbar-collapse-1">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
             <a class="navbar-brand" href="{{ path('ticket_index') }}">Assistance</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Home</a></li>
+                {% if app.user %}
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">Your Roles <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            {% for roles in app.user.roles %}
+                                <li>{{ roles }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endif %}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if app.user %}
+                    <li><a class="navbar-right" href="{{ path('fos_user_profile_show') }}">{{ app.user }}</a></li>
+
+                    <li><a class="navbar-right" href="{{ path('fos_user_security_logout') }}">Logout</a></li>
+                {% else %}
+                    <li><a class="navbar-right" href="{{ path('fos_user_registration_register') }}">Register</a></li>
+                    <li><a class="navbar-right" href="{{ path('fos_user_security_login') }}">Login</a></li>
+                {% endif %}
+            </ul>
         </div>
     </div>
 </nav>
