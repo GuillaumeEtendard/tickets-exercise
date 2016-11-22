@@ -33,10 +33,9 @@
             {{ form_start(delete_form) }}
             <input type="submit" value="Delete Ticket" class="btn btn-primary btn-danger">
             {{ form_end(delete_form) }}
+            <hr>
         {% endfor %}
-
-        <hr>
-
+        
         <div class="well">
             <h4>Leave a Comment:</h4>
             {{ form_start(form, {'action': path('message_new', {'ticketId' : ticket.id}), 'method': 'POST'}) }}
