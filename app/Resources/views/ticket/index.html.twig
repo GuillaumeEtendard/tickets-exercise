@@ -9,7 +9,9 @@
         <a href="{{ path('ticket_new') }}" class="btn btn-primary">
             Create a new ticket</a>
     {% endif %}
+    <hr>
     {% if tickets_created is defined %}
+        {% if tickets_created != null %}<h3>Tickets Created</h3>{% else %}<h3>No Tickets created</h3>{% endif %}
         {% for ticket in tickets_created %}
             <a href="{{ path('ticket_show', { 'id': ticket.id }) }}">
                 <h2>{{ ticket.title }}</h2>
@@ -29,7 +31,8 @@
     {% endif %}
 
     {% if tickets_granted is defined %}
-           {% for ticket in tickets_granted %}
+        {% if tickets_granted != null %}<h3>Tickets Granted</h3>{% else %}<h3>No Tickets granted</h3>{% endif %}
+        {% for ticket in tickets_granted %}
             <a href="{{ path('ticket_show', { 'id': ticket.id }) }}">
                 <h2>{{ ticket.title }}</h2>
             </a>

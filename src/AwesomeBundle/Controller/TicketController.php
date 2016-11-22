@@ -40,7 +40,7 @@ class TicketController extends Controller
             $userTickets = $em->getRepository('AwesomeBundle:Ticket')
                 ->findBy(['owner' => $userConnected], array('created' => 'DESC'));
 
-            $ticketsGranted = $userConnected->getTickets();
+            $ticketsGranted = $userConnected->getTickets()->toArray();
 
             if ($userConnected->hasRole('ROLE_ADMIN')) {
                 return $this->render('ticket/index.html.twig', array(

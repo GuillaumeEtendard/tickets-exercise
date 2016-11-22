@@ -35,7 +35,7 @@
             {{ form_end(delete_form) }}
             <hr>
         {% endfor %}
-        
+
         <div class="well">
             <h4>Leave a Comment:</h4>
             {{ form_start(form, {'action': path('message_new', {'ticketId' : ticket.id}), 'method': 'POST'}) }}
