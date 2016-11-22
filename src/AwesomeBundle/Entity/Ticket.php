@@ -49,20 +49,14 @@ class Ticket
     private $owner;
 
     /**
-     * @ORM\ManyToMany(targetEntity="User", cascade={"persist"})
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\ManyToMany(targetEntity="User", inversedBy="tickets")
      */
-    private $user;
 
+    private $users;
 
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->user = new \Doctrine\Common\Collections\ArrayCollection();
+    public function __construct() {
+        $this->users = new \Doctrine\Common\Collections\ArrayCollection();
     }
-
     /**
      * Get id
      *
@@ -169,6 +163,7 @@ class Ticket
         return $this->owner;
     }
 
+
     /**
      * Add user
      *
@@ -178,7 +173,7 @@ class Ticket
      */
     public function addUser(\AwesomeBundle\Entity\User $user)
     {
-        $this->user[] = $user;
+        $this->users[] = $user;
 
         return $this;
     }
@@ -190,16 +185,16 @@ class Ticket
      */
     public function removeUser(\AwesomeBundle\Entity\User $user)
     {
-        $this->user->removeElement($user);
+        $this->users->removeElement($user);
     }
 
     /**
-     * Get user
+     * Get users
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getUser()
+    public function getUsers()
     {
-        return $this->user;
+        return $this->users;
     }
 }

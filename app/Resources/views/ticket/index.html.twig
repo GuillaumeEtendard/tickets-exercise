@@ -9,7 +9,46 @@
         <a href="{{ path('ticket_new') }}" class="btn btn-primary">
             Create a new ticket</a>
     {% endif %}
+    {% if tickets_created is defined %}
+        {% for ticket in tickets_created %}
+            <a href="{{ path('ticket_show', { 'id': ticket.id }) }}">
+                <h2>{{ ticket.title }}</h2>
+            </a>
+
+            <p><span class="glyphicon glyphicon-time"></span> Posted on
+                {% if ticket.created %}{{ ticket.created|date('Y-m-d H:i:s') }}{% endif %}
+            </p>
+            By {{ ticket.owner }}
+            <p>Users granted : </p>
+
+            {% for usersGranted in ticket.users %}
+                {{ usersGranted.username }}
+            {% endfor %}
+            <hr>
+        {% endfor %}
+    {% endif %}
+
+    {% if tickets_granted is defined %}
+           {% for ticket in tickets_granted %}
+            <a href="{{ path('ticket_show', { 'id': ticket.id }) }}">
+                <h2>{{ ticket.title }}</h2>
+            </a>
+
+            <p><span class="glyphicon glyphicon-time"></span> Posted on
+                {% if ticket.created %}{{ ticket.created|date('Y-m-d H:i:s') }}{% endif %}
+            </p>
+            By {{ ticket.owner }}
+            <p>Users granted : </p>
+
+            {% for usersGranted in ticket.users %}
+                {{ usersGranted.username }}
+            {% endfor %}
+            <hr>
+        {% endfor %}
+    {% endif %}
+
     {% if tickets is defined %}
+        <h3>All Tickets</h3>
         {% for ticket in tickets %}
             <a href="{{ path('ticket_show', { 'id': ticket.id }) }}">
                 <h2>{{ ticket.title }}</h2>
@@ -20,7 +59,8 @@
             </p>
             By {{ ticket.owner }}
             <p>Users granted : </p>
-            {% for usersGranted in ticket.user %}
+
+            {% for usersGranted in ticket.users %}
                 {{ usersGranted.username }}
             {% endfor %}
             <hr>

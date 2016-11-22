@@ -33,20 +33,14 @@ class TicketController extends Controller
         $userConnected = $this->get('security.token_storage')->getToken()->getUser();
 
         if ($userConnected !== 'anon.') {
-            $userTickets = $em->getRepository('AwesomeBundle:Ticket')
-                ->findBy(['owner' => $userConnected->getId()],array('created' => 'DESC'));
 
             $allTickets = $em->getRepository('AwesomeBundle:Ticket')
                 ->findBy([], array('created' => 'DESC'));
 
-            foreach ($allTickets as $ticket) {
-                foreach ($ticket->getUser() as $user) {
-                    if ($user->getId() == $userConnected->getId())
-                        $userTickets[] = $ticket;
-                }
-            }
+            $userTickets = $em->getRepository('AwesomeBundle:Ticket')
+                ->findBy(['owner' => $userConnected], array('created' => 'DESC'));
 
-            $userTickets = array_map("unserialize", array_unique(array_map("serialize", $userTickets)));
+            $ticketsGranted = $userConnected->getTickets();
 
             if ($userConnected->hasRole('ROLE_ADMIN')) {
                 return $this->render('ticket/index.html.twig', array(
@@ -54,7 +48,8 @@ class TicketController extends Controller
                 ));
             }
             return $this->render('ticket/index.html.twig', array(
-                'tickets' => $userTickets,
+                'tickets_created' => $userTickets,
+                'tickets_granted' => $ticketsGranted
             ));
         } else {
             return $this->render('ticket/index.html.twig', array());
@@ -121,7 +116,7 @@ class TicketController extends Controller
             throw new \Exception('You have no permission');
         }
         if (!$user->hasRole('ROLE_ADMIN')) {
-            if ($user != $ticket->getOwner() && !in_array($user, $ticket->getUser()->getValues())) {
+            if ($user != $ticket->getOwner() && !in_array($user, $ticket->getUsers()->getValues())) {
                 throw new \Exception('You have no permission');
             }
         }

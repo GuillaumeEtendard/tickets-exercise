@@ -17,7 +17,7 @@ class TicketEditType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('title');
-        $builder->add('user');
+        $builder->add('users');
     }
 
     /**
